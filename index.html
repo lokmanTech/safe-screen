@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeScreen Ad Floater</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #floater {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #f9f9f9;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    #adPopup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: white;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <div id="floater">
+    <label for="videoSelect">What are you watching?</label><br>
+    <select id="videoSelect">
+      <option value="">--Select--</option>
+      <option value="breaking_bad_s1e1">Breaking Bad S1E1</option>
+    </select><br><br>
+    <button onclick="startTracking()">Start Tracking</button>
+    <div id="status"></div>
+  </div>
+
+  <div id="adPopup">Ad Playing... (Blocking Scene)</div>
+
+  <script>
+    const SCENE_TIMINGS = {
+      "breaking_bad_s1e1": [
+        { start: 60, end: 75 },
+        { start: 180, end: 190 }
+      ]
+    };
+
+    let timer;
+    let startTime;
+    let selectedVideo;
+
+    function startTracking() {
+      selectedVideo = document.getElementById("videoSelect").value;
+      if (!selectedVideo) {
+        alert("Please select a video.");
+        return;
+      }
+      startTime = Date.now();
+      document.getElementById("status").innerText = "Tracking started...";
+
+      timer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById("status").innerText = `Time: ${elapsed}s`;
+
+        const scenes = SCENE_TIMINGS[selectedVideo] || [];
+        scenes.forEach(scene => {
+          if (elapsed >= scene.start - 5 && elapsed < scene.start) {
+            document.getElementById("status").innerText += "\nScene coming. Ad in 5s...";
+          }
+          if (elapsed >= scene.start && elapsed <= scene.end) {
+            document.getElementById("adPopup").style.display = "flex";
+          } else if (elapsed > scene.end) {
+            document.getElementById("adPopup").style.display = "none";
+          }
+        });
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
